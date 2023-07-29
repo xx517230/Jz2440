@@ -2,6 +2,7 @@ objs = start.o
 objs += main.o
 
 objs += led/led.o
+objs += uart/uart.o
 
 all: $(objs)
 	arm-linux-ld -T sdram.lds $^ -o sdram.elf
