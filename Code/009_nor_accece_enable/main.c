@@ -1,6 +1,7 @@
 #include "s3c2440_soc.h"
 #include "led/led.h"
 #include "uart/uart.h"
+#include "nor/nor.h"
 
 
 int main(void)

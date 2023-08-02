@@ -26,40 +26,41 @@ UBRDIV0     0x50000028                      W       R/W     UART 0 baud rate div
 
 void uart0_init()
 {
-	//配置引脚用于URAT，由于使用UART0，相关管脚是TXD0/GPH2,RXD0/GPH3;同时使能内部上拉,UART空闲时为高电平
-	GPHCON = (2<<6)|(2<<4);
-	GPHUP = (3<<2);
+    //配置引脚用于URAT，由于使用UART0，相关管脚是TXD0/GPH2,RXD0/GPH3;同时使能内部上拉,UART空闲时为高电平
+    GPHCON &= ~((2<<6)|(2<<4));
+    GPHCON |= (2<<6)|(2<<4);
+    GPHUP &= ~((1<<2)|(1<<3));
     //配置数据帧8n1-8位数据位，无校验位，1位停止位
-    ULCON0 = (11<0);
-	//配置UART时钟源、Tx/Rx使能(选择中断及查询模式)
-	//UART时钟源三种: PCLK, UEXTCLK or FCLK/n;选择PCLK，最简单也不用想FCLK设置系数
-    UCON0 = (1<<2)|(1<<0);
-	//配置时钟后，配置UART的波特率
-	/*
-		UBRDIVn = (int)( UART clock / ( buad rate x 16) ) –1
-		( UART clock: PCLK, FCLK/n or UEXTCLK )
+    ULCON0 |= (3<0);
+    //配置UART时钟源、Tx/Rx使能(选择中断及查询模式)
+    //UART时钟源三种: PCLK, UEXTCLK or FCLK/n;选择PCLK，最简单也不用想FCLK设置系数
+    UCON0 |= (1<<2)|(1<<0);
+    //配置时钟后，配置UART的波特率
+    /*
+        UBRDIVn = (int)( UART clock / ( buad rate x 16) ) –1
+        ( UART clock: PCLK, FCLK/n or UEXTCLK )
 
-		For example, if the baud-rate is 115200 bps and UART clock is 40 MHz, UBRDIVn is:
-		UBRDIVn = (int)(40000000 / (115200 x 16) ) -1
-		= (int)(21.7) -1 [round to the nearest whole number]
-		= 22 -1 = 21
+        For example, if the baud-rate is 115200 bps and UART clock is 40 MHz, UBRDIVn is:
+        UBRDIVn = (int)(40000000 / (115200 x 16) ) -1
+        = (int)(21.7) -1 [round to the nearest whole number]
+        = 22 -1 = 21
 
-		按上例计算jz2440,	UBRDIVn = (int)(50000000 / (115200 x 16) ) -1
-					   			  = (int)(27.1267) -1 
-					   			  = 26 
-	*/
-	UBRDIV0 = 26;
+        按上例计算jz2440,    UBRDIVn = (int)(50000000 / (115200 x 16) ) -1
+                                  = (int)(27.1267) -1 
+                                  = 26 
+    */
+    UBRDIV0 = 26;
 }
 
 /*
           putchar
          ------->
-	      ARM Tx
-	ARM             PC
+          ARM Tx
+    ARM             PC
    
-		  getchar         
+          getchar         
          <-------
- 		  ARM Rx
+          ARM Rx
 
 
 UART程序最后是烧写到开发板，那么开发板是主设备，读数据时是读取PC上的数据，写数据时是往PC上写数据。
@@ -70,16 +71,16 @@ put只是调用putchar将字符串逐个字符发送而已。简化开发板往PC上发送数据而已。为什么
 */
 
 /*
- 	开发板发送给pc显示,开发板是Tx
+    开发板发送给pc显示,开发板是Tx
 
-	为什么putchar输入参数是int,仿的c标准库的接口
-	库函数 int putchar(int char) 把参数 char 指定的字符（一个无符号字符）写入到标准输出 stdout 中。
-	声明
-	int putchar(int char)
-	参数
-	    char -- 这是要被写入的字符。该字符以其对应的 int 值进行传递。
-	返回值
-	该函数以无符号 char 强制转换为 int 的形式返回写入的字符，如果发生错误则返回 EOF。
+    为什么putchar输入参数是int,仿的c标准库的接口
+    库函数 int putchar(int char) 把参数 char 指定的字符（一个无符号字符）写入到标准输出 stdout 中。
+    声明
+    int putchar(int char)
+    参数
+        char -- 这是要被写入的字符。该字符以其对应的 int 值进行传递。
+    返回值
+    该函数以无符号 char 强制转换为 int 的形式返回写入的字符，如果发生错误则返回 EOF。
 */
 int putchar(int c)
 {
@@ -95,14 +96,18 @@ int putchar(int c)
   对于S3C2440来说，接受数据时，是经过自己内部处理，自己清楚是否处于忙的状态；即使忙也是自己进行后续数据处理；但是对于发送则不一样，
   PC机器忙我们无法知道，Transmitter buffer empty和Transmitter empty两个选项结合可以判断是否PC机器状态，根据需要处理PC机器忙时相关处理功能。
 */
-
-	while(!(UTRSTAT0>>2&1))
-	{
-		//UTXH0/URXH0都是byte
-		UTXH0=(unsigned char)c;
-		return UTXH0;
-	}
-	return -1;
+#define DEBUUG
+#ifdef DEBUG
+    while(!((UTRSTAT0>>2)&1)))
+#else
+    while(!(UTRSTAT0 & (1<<2)))
+#endif
+    {
+        //UTXH0/URXH0都是byte
+        UTXH0=(unsigned char)c;
+        return UTXH0;
+    }
+    return -1;
 
 }
 
@@ -111,10 +116,10 @@ int putchar(int c)
 */
 int getchar(void)
 {
-	while(!(UTRSTAT0 & 1))
-	{
-		return URXH0;
-	}
+    while(!(UTRSTAT0 & 1))
+    {
+        return URXH0;
+    }
 
 }
 
@@ -133,14 +138,14 @@ int puts(const char *str)
 #define NULL 0
 int puts(const char *str)
 {
-	int i=0;
-	if( NULL == str) return 0;
-	while(str[i])
-	{
-		putchar(str[i]);
-		i++;
-	}
-	return ++i; //包括'\0'
+    int i=0;
+    if( NULL == str) return 0;
+    while(str[i])
+    {
+        putchar(str[i]);
+        i++;
+    }
+    return ++i; //包括'\0'
 }
 
 

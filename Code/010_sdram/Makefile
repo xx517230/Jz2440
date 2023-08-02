@@ -4,6 +4,7 @@ objs += main.o
 objs += led/led.o
 objs += uart/uart.o
 objs += nor/nor.o
+objs += sdram/sdram.o
 
 all: $(objs)
 	arm-linux-ld -T sdram.lds $^ -o sdram.elf
