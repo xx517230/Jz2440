@@ -31,7 +31,7 @@ void uart0_init()
     GPHCON |= (2<<6)|(2<<4);
     GPHUP &= ~((1<<2)|(1<<3));
     //配置数据帧8n1-8位数据位，无校验位，1位停止位
-    ULCON0 |= (3<0);
+    ULCON0 |= (3<<0);
     //配置UART时钟源、Tx/Rx使能(选择中断及查询模式)
     //UART时钟源三种: PCLK, UEXTCLK or FCLK/n;选择PCLK，最简单也不用想FCLK设置系数
     UCON0 |= (1<<2)|(1<<0);
@@ -96,19 +96,14 @@ int putchar(int c)
   对于S3C2440来说，接受数据时，是经过自己内部处理，自己清楚是否处于忙的状态；即使忙也是自己进行后续数据处理；但是对于发送则不一样，
   PC机器忙我们无法知道，Transmitter buffer empty和Transmitter empty两个选项结合可以判断是否PC机器状态，根据需要处理PC机器忙时相关处理功能。
 */
-#define DEBUUG
-#ifdef DEBUG
-    while(!((UTRSTAT0>>2)&1)))
-#else
-    while(!(UTRSTAT0 & (1<<2)))
-#endif
+    if(c<0 || c>128) return -1;
+    while(!((UTRSTAT0>>2)&1))
     {
-        //UTXH0/URXH0都是byte
-        UTXH0=(unsigned char)c;
-        return UTXH0;
+        ;//PC机有数据，忙,循环等待
     }
-    return -1;
-
+	//UTXH0/URXH0都是byte
+	UTXH0=(unsigned char)c;
+	return UTXH0;
 }
 
 /*
@@ -118,8 +113,9 @@ int getchar(void)
 {
     while(!(UTRSTAT0 & 1))
     {
-        return URXH0;
+        ;//ARM有数据，忙，循环等待
     }
+	return URXH0;
 
 }
 
@@ -148,5 +144,27 @@ int puts(const char *str)
     return ++i; //包括'\0'
 }
 
+/* 0xABCDEF12 */
+void printHex(unsigned int val)
+{
+	int i;
+	unsigned char arr[8];
 
+	/* 先取出每一位的值 */
+	for (i = 0; i < 8; i++)
+	{
+		arr[i] = val & 0xf;
+		val >>= 4;   /* arr[0] = 2, arr[1] = 1, arr[2] = 0xF */
+	}
+
+	/* 打印 */
+	puts("0x");
+	for (i = 7; i >=0; i--)
+	{
+		if (arr[i] >= 0 && arr[i] <= 9)
+			putchar(arr[i] + '0');
+		else if(arr[i] >= 0xA && arr[i] <= 0xF)
+			putchar(arr[i] - 0xA + 'A');
+	}
+}
 

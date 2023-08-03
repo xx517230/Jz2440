@@ -10,7 +10,7 @@ void led_cycle_light(void)
 {
 	int val = 0;  /* val: 0b000, 0b111 */
 	int tmp;
-
+	int count=0;
 	/* 设置GPFCON让GPF4/5/6配置为输出引脚 */
 	GPFCON &= ~((3<<8) | (3<<10) | (3<<12));
 	GPFCON |=  ((1<<8) | (1<<10) | (1<<12));
@@ -26,7 +26,8 @@ void led_cycle_light(void)
 		val++;
 		if (val == 8)
 			val =0;
-		
+		count++;
+		if(count>3 && val == 0)	break;
 	}
 }
 

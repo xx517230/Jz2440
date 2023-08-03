@@ -86,14 +86,8 @@ _start:
 	bl copy2sdram
 	bl clean_bss
 
-	//重设sp栈到SDRAM
-	ldr sp,=0X33FFFFFF
 	//将pc指向重定位的main函数
 	ldr pc,=main
-
-
-
-
 
 	
 	bl main

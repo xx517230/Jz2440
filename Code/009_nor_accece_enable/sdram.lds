@@ -1,6 +1,6 @@
 SECTIONS
 {
-	. = 0x30000000;
+	. = 0;
 
 	__code_start = .;
 

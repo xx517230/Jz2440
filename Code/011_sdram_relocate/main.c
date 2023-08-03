@@ -11,26 +11,15 @@ const char g_Char2 = 'B';
 int g_A = 0;
 int g_B;
 
+
 int main(void)
 {
 	uart0_init();
-
 	puts("\n\rg_A = ");
 	printHex(g_A);
 	puts("\n\r");
-
 	while (1)
 	{
-#if 0		
-		puts("\n\rg_Char = ");
-		printHex(g_Char);
-		puts("\n\r");
-
-
-		puts("\n\rg_Char3 = ");
-		printHex(g_Char3);
-		puts("\n\r");
-#endif
 		putchar(g_Char);
 		g_Char++;
 

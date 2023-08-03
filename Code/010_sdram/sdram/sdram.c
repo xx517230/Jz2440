@@ -19,11 +19,13 @@ MRSRB7      0x48000030                  Mode register set for SDRAM BANK7
 */
 
 /*
-	由于SDRAM只能接在S3C2440的bank6/bank7，所以我们只关注BANKCON6/BANKCON7,和SDRAM相关的REFRESH/BANKSIZE/MRSRB6/MRSRB7
+	由于SDRAM只能接在S3C2440的bank6/bank7，所以我们只关注 BWSCON,BANKCON6/BANKCON7,和SDRAM相关的REFRESH/BANKSIZE/MRSRB6/MRSRB7
 **/
 
 void sdram_init()
 {
+	BWSCON = 0x22000000;
+	
 	BANKCON6 =0x00018001;
 	BANKCON7 =0x00018001;
 	
@@ -40,15 +42,16 @@ int sdram_test(void)
 {
 	volatile unsigned char *p = (volatile unsigned char *)0x30000000;
 	int i;
-	
+
 	// write sdram
 	for (i = 0; i < 1000; i++)
 		p[i] = 0x55;
-	
+
 	// read sdram
 	for (i = 0; i < 1000; i++)
 		if (p[i] != 0x55)
 			return -1;
+
 	return 0;
 }
 

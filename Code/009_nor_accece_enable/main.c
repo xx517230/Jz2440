@@ -6,26 +6,25 @@
 
 int main(void)
 {
-	unsigned char c;
-
-	led_cycle_light();
+	unsigned int c;
 	uart0_init();
-	puts("Hello, world!\n\r");
-	
 	while(1)
 	{
+		puts("Enter the Tacc val: \n\r");
 		c = getchar();
-		if (c == '\r')
+		if (c >= '0' && c <= '7')
 		{
-			putchar('\n');
+			puts("val = ");
+			putchar(c);
+			puts("\n\r");
+			bank0_nor_init(c - '0');
+			led_cycle_light();
 		}
-
-		if (c == '\n')
+		else
 		{
-			putchar('\r');
+			puts("Error, val should between 0~7\r\n");
+			puts("Enter the Tacc val: \r\n");
 		}
-
-		putchar(c);
 	}
     
     
